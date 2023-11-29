@@ -1,38 +1,27 @@
 NAME = libmx.a
-SRC_DIR = src
-OBJ_DIR = obj
-INC_DIR = inc
-SRC_FILES = $(wildcard $(SRC_DIR)/*.c)
-OBJ_FILES = $(addprefix $(OBJ_DIR)/, $(notdir $(SRC_FILES:%.c=%.o)))
-INC_FILES = $(wildcard $(INC_DIR)/*.h)
+SRC = $(wildcard src/*.c)
+OBJ = $(patsubst src/%.c,obj/%.o,$(SRC))
+
 CC = clang
-CFLAGS = -std=c11 $(addprefix -W, all extra error pedantic) -g
-AR = ar
-AFLAGS = rcs
-MKDIR = mkdir -p
-RM = rm -rf
+CFLAGS = -std=c11 -Wall -Wextra -Werror -Wpedantic
 
-all: $(NAME) clean
+all: $(NAME)
 
-$(NAME): $(OBJ_FILES)
-	@$(AR) $(AFLAGS) $@ $^
+$(NAME): $(OBJ)
+	ar rcs $@ $(OBJ)
 
-$(OBJ_FILES): | $(OBJ_DIR)
-
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(INC_FILES)
-	@$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_DIR)
-
-$(OBJ_DIR):
-	@$(MKDIR) $@
+obj/%.o: src/%.c
+	@mkdir -p obj
+	$(CC) $(CFLAGS) -Iinc -o $@ -c $<
 
 clean:
-	@$(RM) $(OBJ_DIR)
+	rm -rf obj
 
-uninstall:
-	@$(RM) $(OBJ_DIR)
-	@$(RM) $(NAME)
+uninstall: clean
+	rm -rf $(NAME)
 
 reinstall: uninstall all
 
-.PHONY: all uninstall clean reinstall
+
+.PHONY: all clean uninstall reinstall
 
