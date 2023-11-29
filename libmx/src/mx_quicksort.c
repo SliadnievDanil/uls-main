@@ -1,41 +1,37 @@
 #include "libmx.h"
 
-int mx_quicksort(char **str, int left, int right) {
-  if (!str) {
-    return -1;
-  }
-    int i = left;
-    int j = right;
-    int p;
-    int count = 0;
-  char *tmp = NULL;
-  while (i != j) {
-    if ((mx_strlen(str[i]) > mx_strlen(str[j])) == (i < j)) {
-      tmp = str[i];
-      str[i] = str[j];
-      str[j] = tmp;
-      count++;
-
-      p = i;
-      i = j;
-
-      if (p < j)
-        j = p + 1;
-      else
-        j = p - 1;
-    } else {
-      if (i < j)
-        j--;
-      else
-        j++;
+int mx_quicksort(char **arr, int left, int right) 
+{
+    int i = 0;
+    int first = left;
+    int last = right;
+    if(arr == NULL)
+    {
+        return -1;
     }
-  }
-
-  if (left < i - 1)
-    count += mx_quicksort(str, left, i - 1);
-  if (i + 1 < right)
-    count += mx_quicksort(str, i + 1, right);
-
-  return count;
+    else if (left < right) 
+    {
+        int middle = (first + last) / 2;
+        while (first <= last) 
+        {
+            while (mx_strlen(arr[first]) < mx_strlen(arr[middle])) 
+            {
+                first++;
+            }
+            while (mx_strlen(arr[last]) > mx_strlen(arr[middle])) 
+            {
+                last--;
+            }
+            char *tmp = arr[first];
+            arr[first] = arr[last];
+            arr[last] = tmp;
+            first++;
+            last--;
+            i++;
+        }
+        mx_quicksort(arr, left, last);
+        mx_quicksort(arr, first, right);
+    }
+    return i;
 }
 
