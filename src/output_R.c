@@ -28,7 +28,6 @@ void print_R(t_flag *flags, DIR *dir, char *path, bool first, bool end, int num)
             d_count = get_file_count(direct);
         }
         if(d_count != 0) {
-            mx_printchar('\n');
             if(flags->l != 1)
                 print_directories(direct, is_terminal, count, d_count, flags);
             if(flags->l == 1) {

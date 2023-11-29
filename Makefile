@@ -1,46 +1,49 @@
-NAMEBIN = uls
+NAME = uls
 
-SRC_DIR = src
-OBJ_DIR = obj
-INC_DIR = inc
-LIB_DIR = libmx
+CFLG = -std=c11 $(addprefix -W, all extra error pedantic) -g
 
-SRC_FILES = $(wildcard $(SRC_DIR)/*.c)
+SRC_DIR    = src
+INC_DIR    = inc
+OBJ_DIR    = obj
+
+INC_FILES = $(wildcard $(INC_DIR)/.h)
+SRC_FILES = $(wildcard $(SRC_DIR)/.c)
 OBJ_FILES = $(addprefix $(OBJ_DIR)/, $(notdir $(SRC_FILES:%.c=%.o)))
-INC_FILES = $(wildcard $(INC_DIR)/*.h)
-LIB_FILES = $(wildcard $(LIB_DIR)/$(LIB_DIR).a)
-LIB_INC_FILES = $(wildcard $(LIB_DIR)/$(INC_DIR))
 
-CC = clang
-CFLAGS = -std=c11 $(addprefix -W, all extra error pedantic) -gdwarf-4 -D_GNU_SOURCE
-MAKE = make -C
+LIBMX_DIR = libmx
+LIBMX_A:= $(LIBMX_DIR)/libmx.a
+LIBMX_INC:= $(LIBMX_DIR)/inc
 
-MKDIR = mkdir -p
-RM = rm -rf
+all: install
 
-all: $(NAMEBIN) clean
+install: $(LIBMX_A) $(NAME)
 
-$(NAMEBIN): $(OBJ_FILES)
-	@$(MAKE) $(LIB_DIR)
-	@$(CC) $(CFLAGS) $^ -L$(LIB_DIR) -lmx -o $@
+$(NAME): $(OBJ_FILES)
+	@clang $(CFLG) $(OBJ_FILES) -L$(LIBMX_DIR) -lmx -o $@
+	@printf "\r\33[2K$@ \033[32;1mcreated\033[0m\n"
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(INC_FILES)
+	@clang $(CFLG) -c $< -o $@ -I$(INC_DIR) -I$(LIBMX_INC)
+	@printf "\r\33[2K$(NAME) \033[33;1mcompile \033[0m$(<:$(SRC_DIR)/%.c=%) "
 
 $(OBJ_FILES): | $(OBJ_DIR)
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(INC_FILES)
-	@$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_DIR) -I $(LIB_INC_FILES) 
-
 $(OBJ_DIR):
-	@$(MKDIR) $@
+	@mkdir -p $@
+
+$(LIBMX_A):
+	@make -sC $(LIBMX_DIR)
 
 clean:
-	@$(RM) $(OBJ_DIR)
-	@$(RM) $(LIB_FILES)
+	@rm -rf $(OBJ_DIR)
+	@make clean -sC $(LIBMX_DIR)
+	@printf "$(OBJ_DIR) in $(NAME) \033[31;1mdeleted\033[0m\n"
 
 uninstall:
-	@$(RM) $(OBJ_DIR)
-	@$(RM) $(NAMEBIN)
+	@make -sC $(LIBMX_DIR) $@
+	@rm -rf $(OBJ_DIR)
+	@rm -rf $(NAME)
+	@printf "$(NAME) \033[31;1muninstalled\033[0m\n"
 
 reinstall: uninstall all
-
-.PHONY: all uninstall clean reinstall
 
